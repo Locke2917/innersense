@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from .database import engine, Base, get_db
 from .models import User
 from .schemas import UserCreate, UserResponse, UserUpdate
+from .services.etl import start_etl_job
 
 # Create tables automatically
 Base.metadata.create_all(bind=engine)
@@ -19,10 +20,14 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-
 @app.get("/")
 def read_root():
     return {"message": "FastAPI is running with PostgreSQL!"}
+
+@app.post("/etl/start")
+def trigger_etl():
+    job_id = start_etl_job("process_data")
+    return {"message": "ETL job started", "job_id": job_id}
 
 ### 🟢 CREATE a New User
 @app.post("/users/", response_model=UserResponse)

@@ -36,5 +36,11 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+#  etl:
+#    build: ./etl
+#    container_name: etl
+#    volumes:
+#      - ./etl/data:/app/data  # Mounts data for local testing
+          
 volumes:
   postgres_data:
