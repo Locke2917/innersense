@@ -5,7 +5,7 @@ on:
     branches:
       - main  # Runs when code is pushed to main branch
     paths:
-      - "etl/glue_jobs/**"  # Runs only if Glue scripts are updated
+      - "etl/app/glue_jobs/**"  # Runs only if Glue scripts are updated
 
 jobs:
   deploy:
