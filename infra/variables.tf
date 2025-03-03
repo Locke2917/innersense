@@ -5,3 +5,8 @@ variable "aws_region" {
 variable "glue_job_name" {
   default = "MyGlueETLJob"
 }
+
+variable "s3_bucket_name" {
+  description = "The name of the S3 bucket used for AWS Glue"
+  default     = "innersense-ingest-default"  # Change as needed
+}
