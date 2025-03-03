@@ -1,38 +1,53 @@
 import boto3
 import os
 import json
+import logging
 from datetime import datetime
 
-# AWS Clients
-s3_client = boto3.client("s3")
+# Configure logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
 glue_client = boto3.client("glue")
 
-# Get environment variables
-bucket_name = os.getenv("BUCKET_NAME")  # Set this in Terraform
-glue_job_name = os.getenv("GLUE_JOB_NAME")
-
 def lambda_handler(event, context):
-    # Log event received
-    print("🚀 Lambda triggered!! Event received:", json.dumps(event, indent=2))
+    logger.info("🚀 Lambda triggered! Event received: %s", json.dumps(event, indent=2))
 
-    # Write a marker file to S3
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
-    marker_file_key = f"lambda-triggered/lambda_triggered_{timestamp}.txt"
+    # Extract the uploaded file path from the EventBridge event
+    try:
+        bucket_name = event["detail"]["bucket"]["name"]
+        object_key = event["detail"]["object"]["key"]
+    except KeyError:
+        logger.error("❌ EventBridge event structure is incorrect!")
+        return {"statusCode": 400, "body": "Invalid event format"}
+
+    if not object_key.startswith("raw-data/"):
+        logger.info(f"🔕 Skipping file {object_key}, not in raw-data/")
+        return {"statusCode": 200, "body": f"Skipped {object_key}, not in raw-data/"}
     
+    # Construct input & output paths
+    input_path = f"s3://{bucket_name}/{object_key}"
+    timestamp = datetime.utcnow().strftime("%Y-%m-%d_%H-%M-%S")
+    output_path = f"s3://{bucket_name}/processed-data/{timestamp}/"
 
-    s3_client.put_object(
-        Bucket=bucket_name,
-        Key=marker_file_key,
-        Body=f"Lambda was triggered at {timestamp} UTC\nEvent: {json.dumps(event, indent=2)}"
-    )
+    logger.info(f"📌 Extracted input_path: {input_path}")
+    logger.info(f"📌 Generated output_path: {output_path}")
 
-    print(f"📌 Marker file written to s3://{bucket_name}/{marker_file_key}")
+    job_name = os.getenv("GLUE_JOB_NAME")
 
-    # Start Glue job
-    response = glue_client.start_job_run(JobName=glue_job_name)
-    print(f"🔥 Glue job started: {response['JobRunId']}")
+    try:
+        response = glue_client.start_job_run(
+            JobName=job_name,
+            Arguments={
+                "--input_path": input_path,
+                "--output_path": output_path
+            }
+        )
+        logger.info(f"🔥 Glue job started successfully: {response['JobRunId']}")
+    except Exception as e:
+        logger.error(f"❌ Glue job failed to start: {str(e)}")
 
     return {
         "statusCode": 200,
-        "body": json.dumps(f"Glue job started: {response['JobRunId']}, Marker file: {marker_file_key}")
+        "body": json.dumps(f"Glue job started: {response.get('JobRunId', 'N/A')} with input_path: {input_path} and output_path: {output_path}")
     }

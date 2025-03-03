@@ -81,10 +81,10 @@ resource "aws_glue_job" "etl_job" {
     python_version  = "3"
   }
 
-  default_arguments = {
+  #default_arguments = {
     # "--extra-py-files" = "s3://${aws_s3_bucket.etl_bucket.id}/glue-scripts/glue_libs.zip"
-    "--input_path"     = "s3://${aws_s3_bucket.etl_bucket.id}/raw-data/"
-  }
+    # "--input_path"     = "s3://${aws_s3_bucket.etl_bucket.id}/raw-data/"
+  #}
 
   glue_version = "5.0"
   worker_type  = "G.1X"
@@ -201,3 +201,7 @@ resource "aws_iam_role_policy_attachment" "lambda_s3_write_access" {
   role       = aws_iam_role.lambda_role.name
 }
 
+resource "aws_iam_role_policy_attachment" "lambda_cloudwatch_logs" {
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchLogsFullAccess"
+  role       = aws_iam_role.lambda_role.name
+}
