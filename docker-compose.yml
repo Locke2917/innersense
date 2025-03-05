@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   backend:
     build: ./backend
@@ -10,7 +8,7 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_URL=postgresql://postgres:password@db:5432/innersense_db
+      - DATABASE_URL=postgresql://postgres:password@db:5432/innersense
 
   frontend:
     build: ./frontend
@@ -24,15 +22,15 @@ services:
       - backend
 
   db:
-    image: postgres:15
-    container_name: postgres_db
+    image: postgres
+    container_name: postgres
     restart: always
     ports:
       - "5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: innersense_db
+      POSTGRES_PASSWORD: Smartchoice1!
+      POSTGRES_DB: innersense
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

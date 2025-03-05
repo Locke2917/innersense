@@ -93,6 +93,7 @@ out
 .nuxt
 dist
 
+files/
 # Gatsby files
 .cache/
 # Comment in the public line in if your project uses Gatsby and not Next.js
@@ -172,3 +173,5 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+

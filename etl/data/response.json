@@ -1,0 +1,1 @@
+{"errorMessage": "'detail'", "errorType": "KeyError", "requestId": "fa7098bd-0f32-45a2-a029-898b17109e31", "stackTrace": ["  File \"/var/task/lambda_function.py\", line 11, in lambda_handler\n    file_key = event[\"detail\"][\"requestParameters\"][\"key\"]\n"]}

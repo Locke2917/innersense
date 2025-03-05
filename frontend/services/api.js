@@ -1,5 +1,6 @@
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+
 export async function fetchUsers() {
   const response = await fetch(`${API_URL}/users/`);
   console.log(response)
@@ -29,5 +30,12 @@ export async function deleteUser(userId) {
     method: "DELETE",
   });
   if (!response.ok) throw new Error("Failed to delete user");
+  return response.json();
+}
+
+export async function fetchPayers() {
+  const response = await fetch(`${API_URL}/payers/`);
+  console.log(response)
+  if (!response.ok) throw new Error("Failed to fetch payers");
   return response.json();
 }
