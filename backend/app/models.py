@@ -1,5 +1,5 @@
 from .database import Base
-from sqlalchemy import Column, Integer, String, ForeignKey, Numeric, Date, Text, ARRAY
+from sqlalchemy import Column, Integer, String, ForeignKey, Numeric, Date, Text, ARRAY, Binary
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -23,7 +23,7 @@ class Payer(Base):
 class Plan(Base):
     __tablename__ = "plans"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Binary(32), primary_key=True)
     payer_id = Column(Integer, ForeignKey("payers.id"))
     name = Column(String, nullable=False)
     type = Column(String)
@@ -37,14 +37,14 @@ class Plan(Base):
 class Provider(Base):
     __tablename__ = "providers"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Binary(32), primary_key=True)
     npi = Column(String, unique=True, nullable=False)
 
 
 class ProviderGroup(Base):
     __tablename__ = "provider_groups"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Binary(32), primary_key=True)
     payer_id = Column(Integer, ForeignKey("payers.id"))
     payer_assigned_id = Column(String, unique=True, nullable=False)  # Maps to provider_group_id in JSON
     ein = Column(String)
@@ -55,8 +55,8 @@ class ProviderGroup(Base):
 class ProviderGroupMember(Base):
     __tablename__ = "provider_group_members"
 
-    provider_group_id = Column(Integer, ForeignKey("provider_groups.id"), primary_key=True)
-    provider_id = Column(Integer, ForeignKey("providers.id"), primary_key=True)
+    provider_group_id = Column(Binary(32), ForeignKey("provider_groups.id"), primary_key=True)
+    provider_id = Column(Binary(32), ForeignKey("providers.id"), primary_key=True)
 
     provider_group = relationship("ProviderGroup", backref="members")
     provider = relationship("Provider", backref="groups")
@@ -65,7 +65,7 @@ class ProviderGroupMember(Base):
 class FeeSchedule(Base):
     __tablename__ = "fee_schedules"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Binary(32), primary_key=True)
     payer_id = Column(Integer, ForeignKey("payers.id"))
     description = Column(String, nullable=False)
     source_file_url = Column(String)
@@ -77,8 +77,8 @@ class PlanFeeSchedule(Base):
     __tablename__ = "plan_fee_schedules"
 
     id = Column(Integer, primary_key=True)
-    plan_id = Column(Integer, ForeignKey("plans.id"))
-    fee_schedule_id = Column(Integer, ForeignKey("fee_schedules.id"))
+    plan_id = Column(Binary(32), ForeignKey("plans.id"))
+    fee_schedule_id = Column(Binary(32), ForeignKey("fee_schedules.id"))
 
     plan = relationship("Plan", backref="fee_schedules")
     fee_schedule = relationship("FeeSchedule", backref="plans")
@@ -87,7 +87,7 @@ class PlanFeeSchedule(Base):
 class ServiceLine(Base):
     __tablename__ = "service_lines"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Binary(32), primary_key=True)
     billing_code = Column(String, nullable=False)
     billing_code_type = Column(String, nullable=False)
     billing_code_type_version = Column(String)
@@ -96,10 +96,10 @@ class ServiceLine(Base):
 class NegotiatedRate(Base):
     __tablename__ = "negotiated_rates"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Binary(32), primary_key=True)
     payer_id = Column(Integer, ForeignKey("payers.id"))
-    fee_schedule_id = Column(Integer, ForeignKey("fee_schedules.id"))
-    service_line_id = Column(Integer, ForeignKey("service_lines.id"))
+    fee_schedule_id = Column(Binary(32), ForeignKey("fee_schedules.id"))
+    service_line_id = Column(Binary(32), ForeignKey("service_lines.id"))
     negotiation_arrangement = Column(String, nullable=False)
     negotiated_type = Column(String, nullable=False)
     negotiated_rate = Column(Numeric(10, 2), nullable=False)
@@ -116,8 +116,8 @@ class NegotiatedRateProviderGroup(Base):
     __tablename__ = "negotiated_rate_provider_groups"
 
     id = Column(Integer, primary_key=True)
-    negotiated_rate_id = Column(Integer, ForeignKey("negotiated_rates.id"))
-    provider_group_id = Column(Integer, ForeignKey("provider_groups.id"))
+    negotiated_rate_id = Column(Binary(32), ForeignKey("negotiated_rates.id"))
+    provider_group_id = Column(Binary(32), ForeignKey("provider_groups.id"))
 
     negotiated_rate = relationship("NegotiatedRate", backref="provider_groups")
     provider_group = relationship("ProviderGroup", backref="negotiated_rates")

@@ -14,11 +14,11 @@ DROP TABLE IF EXISTS service_lines;
 CREATE TABLE payers (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    mrf_index_file_url TXT
+    mrf_index_file_url TEXT
 );
 
 CREATE TABLE plans (
-    id SERIAL PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     payer_id INT REFERENCES payers(id),
     name TEXT NOT NULL,
     type TEXT,
@@ -28,48 +28,48 @@ CREATE TABLE plans (
 );
 
 CREATE TABLE providers (
-    id SERIAL PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     npi BIGINT UNIQUE NOT NULL
 );
 
 CREATE TABLE provider_groups (
-    id SERIAL PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     payer_id INT REFERENCES payers(id),
     payer_assigned_id TEXT NOT NULL UNIQUE,
     ein TEXT
 );
 
 CREATE TABLE provider_group_members (
-    provider_group_id INT REFERENCES provider_groups(id),
-    provider_id INT REFERENCES providers(id),
+    provider_group_id TEXT REFERENCES provider_groups(id),
+    provider_id TEXT REFERENCES providers(id),
     PRIMARY KEY (provider_group_id, provider_id)
 );
 
 CREATE TABLE fee_schedules (
-    id SERIAL PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     payer_id INT REFERENCES payers(id),
     description TEXT NOT NULL,
     source_file_url TEXT
 );
 
 CREATE TABLE plan_fee_schedules (
-    id SERIAL PRIMARY KEY,
-    plan_id INT REFERENCES plans(id),
-    fee_schedule_id INT REFERENCES fee_schedules(id)
+    id BIGSERIAL PRIMARY KEY,
+    plan_id TEXT REFERENCES plans(id),
+    fee_schedule_id TEXT REFERENCES fee_schedules(id)
 );
 
 CREATE TABLE service_lines (
-    id SERIAL PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     billing_code TEXT NOT NULL,
     billing_code_type TEXT NOT NULL,
     billing_code_type_version TEXT
 );
 
 CREATE TABLE negotiated_rates (
-    id SERIAL PRIMARY KEY,
+    id TEXT PRIMARY KEY,
     payer_id INT REFERENCES payers(id),
-    fee_schedule_id INT REFERENCES fee_schedules(id),
-    service_line_id INT REFERENCES service_lines(id),
+    fee_schedule_id TEXT REFERENCES fee_schedules(id),
+    service_line_id TEXT REFERENCES service_lines(id),
     negotiation_arrangement TEXT NOT NULL,
     negotiated_type TEXT NOT NULL,
     negotiated_rate DECIMAL(10,2) NOT NULL,
@@ -79,11 +79,12 @@ CREATE TABLE negotiated_rates (
 );
 
 CREATE TABLE negotiated_rate_provider_groups (
-    id SERIAL PRIMARY KEY,
-    negotiated_rate_id INT REFERENCES negotiated_rates(id),
-    provider_group_id INT REFERENCES provider_groups(id)
+    id BIGSERIAL PRIMARY KEY,
+    negotiated_rate_id TEXT REFERENCES negotiated_rates(id),
+    provider_group_id TEXT REFERENCES provider_groups(id)
 );
 
+CREATE INDEX idx_pfs_plan_fee_schedules ON plan_fee_schedules (plan_id, fee_schedule_id);
 CREATE INDEX idx_nrpg_negotiated_rate_provider ON negotiated_rate_provider_groups (negotiated_rate_id, provider_group_id);
 
 
@@ -92,7 +93,7 @@ INSERT INTO payers (id, name, mrf_index_file_url) VALUES
 (100, 'Blue Cross and Blue Shield of Illinois', 'https://app0004702110a5prdnc868.blob.core.windows.net/toc/2025-02-21_Blue-Cross-and-Blue-Shield-of-Illinois_index.json');
 
 INSERT INTO plans (id, payer_id, name, type, category_id, category_id_type, plan_market_type) VALUES
-(500, 100, '000523 10 PPO+ NPP83323_XOF', 'PPO', '36096', 'HIOS', 'group');
+(digest('100_000523 10 PPO+ NPP83323_XOF', 'sha256'), 100, '000523 10 PPO+ NPP83323_XOF', 'PPO', '36096', 'HIOS', 'group');
 
 INSERT INTO providers (id, npi) VALUES
 (99, 1003232992),

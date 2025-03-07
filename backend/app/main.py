@@ -23,7 +23,7 @@ app.add_middleware(
 
 @app.get("/")
 def read_root():
-    return {"message": "FastAPI is running with PostgreSQL!"}
+    return {"message": "FastAPI is running with PostgreSss@"}
 
 @app.get("/rates/{billing_code}/{payer_id}")
 def get_rates(billing_code: str, payer_id: int, db: Session = Depends(get_db)):
